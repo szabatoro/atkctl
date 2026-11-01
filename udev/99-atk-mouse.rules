@@ -1,0 +1,3 @@
+# ATK / Compx USB Peripherals & Receiver Dongles
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="373b", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="373b", MODE="0666"
