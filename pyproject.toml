@@ -1,5 +1,5 @@
 [project]
-name = "atkmouse"
+name = "atkctl"
 version = "0.1.0"
 description = "ATK A9 PRO MAX 2.0 NK mouse — battery monitor and config tool (BITMOUSE protocol)"
 readme = "README.md"
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-atkmouse = "atkmouse.cli:main"
+atkctl = "atkctl.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.13.6,<0.14.0"]

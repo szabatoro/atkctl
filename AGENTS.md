@@ -1,4 +1,4 @@
-# atkmouse — Agent Guidance
+# atkctl — Agent Guidance
 
 ## Project Overview
 
@@ -10,10 +10,10 @@ The protocol was reverse-engineered by intercepting WebHID traffic from [ATK HUB
 
 | File | What it does |
 |------|-------------|
-| `src/atkmouse/protocol.py` | Core protocol — BITMOUSE framing, `AtkDevice` class, all query/command methods |
-| `src/atkmouse/cli.py` | CLI commands — `battery`, `status`, `monitor`, `discover`, `debug`, `eeprom`, all `set-*` commands |
+| `src/atkctl/protocol.py` | Core protocol — BITMOUSE framing, `AtkDevice` class, all query/command methods |
+| `src/atkctl/cli.py` | CLI commands — `battery`, `status`, `monitor`, `discover`, `debug`, `eeprom`, all `set-*` commands |
 | `docs/PROTOCOL.md` | Full protocol documentation (BITMOUSE frame format, commands, DPI block, config block) |
-| `udev/99-atk-mouse.rules` | udev rules — grants seat-local users ACL-based access |
+| `udev/99-atkctl-mouse.rules` | udev rules — grants seat-local users ACL-based access |
 | `PKGBUILD` | Arch Linux package definition |
 
 ## Protocol Summary (BITMOUSE)
@@ -35,12 +35,12 @@ Response: [0] 0x08 [1] 0x72 [2] status [3] cmdSn [4] target [5] cmdId [6] payloa
 ## Running
 
 ```bash
-uv run atkmouse battery        # Quick battery read
-uv run atkmouse status         # Full telemetry dump
-uv run atkmouse status --json  # Machine-readable
-uv run atkmouse monitor        # Continuous polling
-uv run atkmouse eeprom 0x0001  # Read arbitrary EEPROM address
-uv run atkmouse eeprom 0x0000 --scan 0x0060  # Scan EEPROM range
+uv run atkctl battery        # Quick battery read
+uv run atkctl status         # Full telemetry dump
+uv run atkctl status --json  # Machine-readable
+uv run atkctl monitor        # Continuous polling
+uv run atkctl eeprom 0x0001  # Read arbitrary EEPROM address
+uv run atkctl eeprom 0x0000 --scan 0x0060  # Scan EEPROM range
 ```
 
 ## Common Pitfalls

@@ -1,4 +1,4 @@
-# atkmouse
+# atkctl
 
 Linux battery monitor and config tool for **ATK A9 PRO MAX 2.0 NK** gaming mice (and compatible ATK/VXE/VGN models with BITMOUSE firmware).
 
@@ -8,38 +8,38 @@ Communicates over USB HID using the reverse-engineered BITMOUSE protocol on usag
 
 ```bash
 # Install udev rules (one-time; unplug/replug after)
-sudo cp udev/99-atk-mouse.rules /etc/udev/rules.d/
+sudo cp udev/99-atkctl-mouse.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
 # Read battery once
-uv run atkmouse battery
+uv run atkctl battery
 
 # Monitor continuously
-uv run atkmouse monitor
+uv run atkctl monitor
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `atkmouse battery` | Read battery level once |
-| `atkmouse status`  | Full telemetry dump (battery, polling, DPI, lift-off, settings) |
-| `atkmouse monitor` | Continuous battery polling |
-| `atkmouse discover` | Scan and show all ATK HID interfaces |
-| `atkmouse debug`   | Raw HID traffic hex dump |
-| `atkmouse eeprom`  | Read EEPROM addresses or scan a range |
-| `atkmouse set-polling` | Set polling rate (Hz or BITMOUSE code) |
-| `atkmouse set-dpi` | Write or activate a DPI stage |
-| `atkmouse set-debounce` | Set stabilization time (ms) |
-| `atkmouse set-motion-sync` | Toggle motion sync |
-| `atkmouse set-angle-snap` | Toggle angle snapping |
-| `atkmouse set-ripple` | Toggle ripple control |
-| `atkmouse set-sleep` | Set auto-sleep timeout |
-| `atkmouse set-liftoff` | Set lift-off distance |
-| `atkmouse set-dongle-light` | Set dongle LED mode |
+| `atkctl battery` | Read battery level once |
+| `atkctl status`  | Full telemetry dump (battery, polling, DPI, lift-off, settings) |
+| `atkctl monitor` | Continuous battery polling |
+| `atkctl discover` | Scan and show all ATK HID interfaces |
+| `atkctl debug`   | Raw HID traffic hex dump |
+| `atkctl eeprom`  | Read EEPROM addresses or scan a range |
+| `atkctl set-polling` | Set polling rate (Hz or BITMOUSE code) |
+| `atkctl set-dpi` | Write or activate a DPI stage |
+| `atkctl set-debounce` | Set stabilization time (ms) |
+| `atkctl set-motion-sync` | Toggle motion sync |
+| `atkctl set-angle-snap` | Toggle angle snapping |
+| `atkctl set-ripple` | Toggle ripple control |
+| `atkctl set-sleep` | Set auto-sleep timeout |
+| `atkctl set-liftoff` | Set lift-off distance |
+| `atkctl set-dongle-light` | Set dongle LED mode |
 
-Use `atkmouse <command> --help` for per-command options. Add `--device /dev/hidrawN` if auto-detection doesn't find the right path.
+Use `atkctl <command> --help` for per-command options. Add `--device /dev/hidrawN` if auto-detection doesn't find the right path.
 
 ## Installation
 
@@ -53,15 +53,15 @@ makepkg -si
 ### From source
 
 ```bash
-uv run atkmouse battery
+uv run atkctl battery
 ```
 
 ### udev rules
 
-The udev rule at `udev/99-atk-mouse.rules` grants access to users physically at the system's console (via `TAG+="uaccess"` / systemd-logind ACL). Without it you'll need root:
+The udev rule at `udev/99-atkctl-mouse.rules` grants access to users physically at the system's console (via `TAG+="uaccess"` / systemd-logind ACL). Without it you'll need root:
 
 ```bash
-sudo cp udev/99-atk-mouse.rules /etc/udev/rules.d/
+sudo cp udev/99-atkctl-mouse.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 ```
 
@@ -69,11 +69,11 @@ sudo udevadm control --reload-rules
 
 | Path | Description |
 |------|-------------|
-| `src/atkmouse/` | Python package source |
-| `src/atkmouse/protocol.py` | BITMOUSE protocol — `AtkDevice` class, all query/command methods |
-| `src/atkmouse/cli.py` | CLI entry point and all subcommands |
+| `src/atkctl/` | Python package source |
+| `src/atkctl/protocol.py` | BITMOUSE protocol — `AtkDevice` class, all query/command methods |
+| `src/atkctl/cli.py` | CLI entry point and all subcommands |
 | `docs/PROTOCOL.md` | Full protocol documentation (frame format, commands, DPI block) |
-| `udev/99-atk-mouse.rules` | udev rules for device access |
+| `udev/99-atkctl-mouse.rules` | udev rules for device access |
 | `PKGBUILD` | Arch Linux package definition |
 
 ## Credits

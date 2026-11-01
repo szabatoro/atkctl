@@ -9,7 +9,7 @@ from typing import Optional
 
 import hid
 
-from .protocol import (
+from atkctl.protocol import (
     AtkDevice,
     BatteryStatus,
     CMD_BATTERY,
@@ -501,7 +501,7 @@ def main() -> None:
         description="ATK Mouse — query and configure ATK A9 PRO MAX / VXE / VGN gaming mice"
     )
 
-    sub = parser.add_subparsers(dest="command", prog="atkmouse")
+    sub = parser.add_subparsers(dest="command", prog="atkctl")
 
     # ── battery ───────────────────────────────────────────────────────
     p = sub.add_parser(
@@ -604,8 +604,8 @@ def main() -> None:
         ),
         epilog=(
             "Examples:\n"
-            "  atkmouse set-polling 1000\n"
-            "  atkmouse set-polling --code 0\n"
+            "  atkctl set-polling 1000\n"
+            "  atkctl set-polling --code 0\n"
             "\n"
             "Hz values: 125, 250, 500, 1000, 2000, 4000, 8000\n"
             "Codes: 0=1000  1=500  2=250  3=125  4=8000  5=4000  6=2000"
@@ -629,9 +629,9 @@ def main() -> None:
         ),
         epilog=(
             "Examples:\n"
-            "  atkmouse set-dpi 0 3000 3000          # set stage 0, make active\n"
-            "  atkmouse set-dpi 2                    # activate existing stage 2\n"
-            "  atkmouse set-dpi 1 2000 2000 --no-enable --green 255"
+            "  atkctl set-dpi 0 3000 3000          # set stage 0, make active\n"
+            "  atkctl set-dpi 2                    # activate existing stage 2\n"
+            "  atkctl set-dpi 1 2000 2000 --no-enable --green 255"
         ),
     )
     p.add_argument("stage", type=int, metavar="STAGE",
@@ -660,7 +660,7 @@ def main() -> None:
             "Higher values reduce unintended pointer movement when "
             "lifting the mouse off the surface."
         ),
-        epilog="Example:  atkmouse set-debounce 4",
+        epilog="Example:  atkctl set-debounce 4",
     )
     p.add_argument("ms", type=int, metavar="MS",
                    help="Debounce time in milliseconds (0-255)")
@@ -676,7 +676,7 @@ def main() -> None:
             "ties the X and Y axes together so the sensor behaves "
             "more predictably during fast flicks."
         ),
-        epilog="Example:  atkmouse set-motion-sync on",
+        epilog="Example:  atkctl set-motion-sync on",
     )
     p.add_argument("state", type=str, choices=["on", "off"], metavar="{on,off}",
                    help="on or off")
@@ -692,7 +692,7 @@ def main() -> None:
             "correction). When on, the sensor snaps the cursor angle "
             "to the nearest 45-degree increment at low speeds."
         ),
-        epilog="Example:  atkmouse set-angle-snap off",
+        epilog="Example:  atkctl set-angle-snap off",
     )
     p.add_argument("state", type=str, choices=["on", "off"], metavar="{on,off}",
                    help="on or off")
@@ -707,7 +707,7 @@ def main() -> None:
             "Enable or disable ripple control. Ripple control filters "
             "out high-frequency vibrations from the sensor surface."
         ),
-        epilog="Example:  atkmouse set-ripple on",
+        epilog="Example:  atkctl set-ripple on",
     )
     p.add_argument("state", type=str, choices=["on", "off"], metavar="{on,off}",
                    help="on or off")
@@ -725,8 +725,8 @@ def main() -> None:
         ),
         epilog=(
             "Examples:\n"
-            "  atkmouse set-sleep 60       # 1 minute\n"
-            "  atkmouse set-sleep 0        # never sleep"
+            "  atkctl set-sleep 60       # 1 minute\n"
+            "  atkctl set-sleep 0        # never sleep"
         ),
     )
     p.add_argument("seconds", type=int, metavar="SECONDS",
@@ -745,8 +745,8 @@ def main() -> None:
         ),
         epilog=(
             "Examples:\n"
-            "  atkmouse set-liftoff 4   # Medium (1.0 mm)\n"
-            "  atkmouse set-liftoff 1   # Low (0.7 mm)"
+            "  atkctl set-liftoff 4   # Medium (1.0 mm)\n"
+            "  atkctl set-liftoff 1   # Low (0.7 mm)"
         ),
     )
     p.add_argument("level", type=int, metavar="LEVEL",
@@ -765,8 +765,8 @@ def main() -> None:
         ),
         epilog=(
             "Examples:\n"
-            "  atkmouse set-dongle-light 0   # Off\n"
-            "  atkmouse set-dongle-light 1   # Follows polling rate"
+            "  atkctl set-dongle-light 0   # Off\n"
+            "  atkctl set-dongle-light 1   # Follows polling rate"
         ),
     )
     p.add_argument("mode", type=int, metavar="MODE",

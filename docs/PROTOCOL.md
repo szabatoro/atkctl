@@ -373,7 +373,7 @@ When the mouse is wirelessly connected but **asleep** (power saving), the dongle
 - Battery query returns `byte[7] = 0` (0%)
 - EEPROM reads may return stale/cached data
 
-The mouse needs to be moving (awake) for reliable readings. If a query returns zero data, wait 1–2 seconds and retry. The `atkmouse battery` command doubles as a wake-up call.
+The mouse needs to be moving (awake) for reliable readings. If a query returns zero data, wait 1–2 seconds and retry. The `atkctl battery` command doubles as a wake-up call.
 
 ---
 
