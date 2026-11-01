@@ -12,3 +12,5 @@ wheels/
 # Build artifacts (makepkg)
 pkg/
 *.pkg.tar.zst
+src/*.tar.gz        # makepkg's $srcdir archive (created in prepare())
+src/atkmouse-*/     # makepkg's $srcdir extracted source tree

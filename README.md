@@ -58,7 +58,7 @@ uv run atkmouse battery
 
 ### udev rules
 
-The udev rule at `udev/99-atk-mouse.rules` grants world-accessible permissions to the ATK mouse HID interface. Without it you'll need root:
+The udev rule at `udev/99-atk-mouse.rules` grants access to users physically at the system's console (via `TAG+="uaccess"` / systemd-logind ACL). Without it you'll need root:
 
 ```bash
 sudo cp udev/99-atk-mouse.rules /etc/udev/rules.d/
