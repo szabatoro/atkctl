@@ -9,7 +9,5 @@ wheels/
 # Virtual environments
 .venv
 
-# Build artifacts
+# Build artifacts (makepkg)
 pkg/
-atkmouse-0.1.0/
-atkmouse-0.1.0.tar.gz
