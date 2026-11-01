@@ -11,3 +11,4 @@ wheels/
 
 # Build artifacts (makepkg)
 pkg/
+*.pkg.tar.zst
