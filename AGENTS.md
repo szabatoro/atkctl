@@ -12,9 +12,15 @@ The protocol was reverse-engineered by intercepting WebHID traffic from [ATK HUB
 
 | File | What it does |
 |------|-------------|
-| `src/atkctl/protocol.py` | Core protocol — BITMOUSE framing, `AtkDevice` class, all query/command methods |
+| `src/atkctl/commands.py` | BITMOUSE command IDs, polling rate codes, slot constants, EEPROM map |
+| `src/atkctl/models.py` | Data models — `BatteryStatus`, `MouseInfo`, `PanelData` TypedDict, helpers |
+| `src/atkctl/framing.py` | BITMOUSE frame building (`build_request`) and parsing (`parse_response`) |
+| `src/atkctl/discovery.py` | Device discovery — `find_atk_hidraw5()`, `enumerate_atk_interfaces()` |
+| `src/atkctl/device.py` | Abstract seam (`AtkDeviceProtocol`), HID impl (`HidDevice`), test fake (`FakeDevice`) |
 | `src/atkctl/cli.py` | CLI commands — `battery`, `status`, `monitor`, `discover`, `debug`, `eeprom`, all `set-*` commands |
 | `src/atkctl_gui/` | Qt6 GUI frontend (PySide6) — independent `pyproject.toml` at `src/atkctl_gui/pyproject.toml` |
+| `CONTEXT.md` | Domain glossary and architecture decisions |
+| `tests/test_device.py` | 38 tests using the `FakeDevice` seam |
 | `docs/PROTOCOL.md` | Full protocol documentation (BITMOUSE frame format, commands, DPI block, config block) |
 | `udev/70-atkctl-mouse.rules` | udev rules — grants seat-local users ACL-based access |
 | `PKGBUILD` | Arch Linux package definition (CLI) |
