@@ -1,0 +1,19 @@
+# ATK / Compx USB Peripherals & Receiver Dongles (BITMOUSE protocol)
+#
+# Grants read-write access to the mouse configuration HID interface
+# for users physically logged into the system's local seat.
+#
+# Uses TAG+="uaccess" which makes systemd-logind dynamically grant
+# access via ACL. This is the modern recommended approach — it avoids
+# both world-writable (0666) and static-group (plugdev) models.
+#
+# The SUBSYSTEM=="usb" line is intentionally omitted: this tool uses
+# hidapi via the hidraw driver; raw USB device access is unnecessary.
+#
+# NOTE: Rules file must sort lexically before 73-seat-late.rules
+# (systemd internal). The "99-" prefix satisfies this.
+#
+# Apply with:
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="373b", TAG+="uaccess"

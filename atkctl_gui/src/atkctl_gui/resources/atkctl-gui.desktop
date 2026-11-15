@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=ATK Mouse Config
+Comment=Configure ATK/VXE/VGN gaming mice (polling rate, DPI, debounce, etc.)
+Exec=atkctl-gui
+Icon=input-mouse
+Terminal=false
+Categories=Settings;HardwareSettings;Utility;
+Keywords=mouse;gaming;ATK;VXE;VGN;configuration;

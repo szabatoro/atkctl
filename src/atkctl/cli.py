@@ -375,20 +375,6 @@ def _parse_bool(val: str) -> bool:
 # Uses lift_off_description() — offset-calibration level = lift-off level - 1
 
 
-DONGLE_LIGHT_MODES: dict[int, str] = {
-    0: "Off",
-    1: "Polling rate",
-    2: "Battery level",
-    3: "Low battery",
-    4: "Effect 4",
-    5: "Effect 5",
-}
-
-
-def _dongle_light_desc(mode: int) -> str:
-    return DONGLE_LIGHT_MODES.get(mode, f"Mode {mode}")
-
-
 # ── Setter CLI commands ──────────────────────────────────────
 
 def cmd_set_debounce(args: argparse.Namespace) -> None:
@@ -469,21 +455,6 @@ def cmd_set_liftoff(args: argparse.Namespace) -> None:
         if ok:
             # lift_off_description expects lift-off level = offset_calibration + 1
             print(f"OK Lift-off: level {level}  ({lift_off_description(level + 1)})")
-        else:
-            print("FAILED No response from device", file=sys.stderr)
-            sys.exit(1)
-
-
-def cmd_set_dongle_light(args: argparse.Namespace) -> None:
-    """Set dongle LED mode."""
-    mode = args.mode
-    if mode < 0 or mode > 255:
-        print("Mode must be 0-255", file=sys.stderr)
-        sys.exit(1)
-    with _open(args.device) as dev:
-        ok = dev.set_dongle_light(mode)
-        if ok:
-            print(f"OK Dongle LED: mode {mode}  ({_dongle_light_desc(mode)})")
         else:
             print("FAILED No response from device", file=sys.stderr)
             sys.exit(1)
@@ -754,26 +725,6 @@ def main() -> None:
     p.add_argument("--device", "-d", metavar="PATH",
                    help="HID device path. Auto-detected if omitted")
 
-    # ── set-dongle-light ──────────────────────────────────────────────
-    p = sub.add_parser(
-        "set-dongle-light",
-        help="Set dongle LED mode",
-        description=(
-            "Change the LED behaviour on the wireless receiver dongle. "
-            "Mode 0 turns the LED off; modes 1-3 follow different "
-            "device status signals."
-        ),
-        epilog=(
-            "Examples:\n"
-            "  atkctl set-dongle-light 0   # Off\n"
-            "  atkctl set-dongle-light 1   # Follows polling rate"
-        ),
-    )
-    p.add_argument("mode", type=int, metavar="MODE",
-                   help="LED mode (0=Off, 1=Polling rate, 2=Battery level, 3=Low battery)")
-    p.add_argument("--device", "-d", metavar="PATH",
-                   help="HID device path. Auto-detected if omitted")
-
     # ── Patch every subparser to show help on missing args ───────────
     for _name, _p in sub.choices.items():
         _p.error = lambda msg, _parser=_p: _help_on_missing(_parser, msg)
@@ -795,7 +746,7 @@ def main() -> None:
         "set-ripple": cmd_set_ripple,
         "set-sleep": cmd_set_sleep,
         "set-liftoff": cmd_set_liftoff,
-        "set-dongle-light": cmd_set_dongle_light,
+        
     }
     handler = _DISPATCH.get(args.command)
     if handler:

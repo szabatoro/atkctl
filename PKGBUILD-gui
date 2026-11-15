@@ -1,0 +1,60 @@
+# Maintainer: ATK Mouse contributors
+
+pkgname=atkctl-gui
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="ATK mouse — Qt6 configuration GUI (PySide6)"
+arch=('any')
+url="https://github.com/szabatoro/atkctl"
+license=('BSD')
+depends=(
+    'atkctl'
+    'python>=3.13'
+    'pyside6'
+)
+makedepends=(
+    'python-installer'
+    'python-wheel'
+    'uv'
+)
+
+# ── Source ──────────────────────────────────────────────────────────────────────
+source=()
+noextract=()
+validpgpkeys=()
+sha256sums=()
+
+prepare() {
+    git -C "$startdir" archive --format=tar.gz \
+        --prefix="atkctl-$pkgver/" \
+        -o "$srcdir/atkctl-$pkgver.tar.gz" HEAD
+    cd "$srcdir"
+    tar xzf "atkctl-$pkgver.tar.gz"
+}
+
+build() {
+    # Build only the GUI sub-package from its own pyproject.toml
+    cd "$srcdir/atkctl-$pkgver/atkctl_gui"
+    uv build
+}
+
+check() {
+    cd "$srcdir/atkctl-$pkgver"
+    # Smoke test: verify the GUI package code
+    PYTHONPATH=atkctl_gui/src python -c "
+from atkctl_gui import __version__
+assert __version__ == '$pkgver', f'expected $pkgver, got {__version__}'
+print(f'OK atkctl-gui {__version__} — smoke test passed')
+"
+}
+
+package() {
+    cd "$srcdir/atkctl-$pkgver/atkctl_gui"
+
+    # ── Python module + scripts ─────────────────────────────────────────────
+    python -m installer --destdir="$pkgdir" dist/*.whl
+
+    # ── Desktop entry ───────────────────────────────────────────────────────
+    install -Dm644 src/atkctl_gui/resources/atkctl-gui.desktop \
+        "$pkgdir/usr/share/applications/atkctl-gui.desktop"
+}

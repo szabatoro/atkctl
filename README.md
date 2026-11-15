@@ -38,6 +38,7 @@ uv run atkctl monitor
 | `atkctl set-sleep` | Set auto-sleep timeout |
 | `atkctl set-liftoff` | Set lift-off distance |
 | `atkctl set-dongle-light` | Set dongle LED mode |
+| `atkctl-gui` | Qt GUI frontend (requires `python-pyside6`) |
 
 Use `atkctl <command> --help` for per-command options. Add `--device /dev/hidrawN` if auto-detection doesn't find the right path.
 
@@ -72,6 +73,7 @@ sudo udevadm control --reload-rules
 | `src/atkctl/` | Python package source |
 | `src/atkctl/protocol.py` | BITMOUSE protocol — `AtkDevice` class, all query/command methods |
 | `src/atkctl/cli.py` | CLI entry point and all subcommands |
+| `src/atkctl_gui/` | Qt6 GUI frontend (PySide6) |
 | `docs/PROTOCOL.md` | Full protocol documentation (frame format, commands, DPI block) |
 | `udev/70-atkctl-mouse.rules` | udev rules for device access |
 | `PKGBUILD` | Arch Linux package definition |
