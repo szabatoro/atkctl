@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from atkctl.protocol import POLLING_CODES_REV
+from atkctl.commands import POLLING_CODES_REV
 from atkctl_gui.ui._helpers import section_title
 
 # ── Polling rate lookups ──────────────────────────────────────────────

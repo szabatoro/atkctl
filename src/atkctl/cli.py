@@ -1,5 +1,7 @@
 """CLI interface for ATK mouse battery monitoring."""
 
+from __future__ import annotations
+
 import argparse
 import json
 import os
@@ -9,17 +11,10 @@ from typing import Optional
 
 import hid
 
-from atkctl.protocol import (
-    AtkDevice,
-    BatteryStatus,
-    CMD_BATTERY,
-    POLLING_CODES,
-    POLLING_CODES_REV,
-    find_atk_hidraw5,
-    enumerate_atk_interfaces,
-    CMD_READ_EEPROM,
-    lift_off_description,
-)
+from atkctl.commands import CMD_BATTERY, CMD_READ_EEPROM, POLLING_CODES, POLLING_CODES_REV
+from atkctl.device import AtkDeviceProtocol, HidDevice
+from atkctl.discovery import enumerate_atk_interfaces, find_atk_hidraw5
+from atkctl.models import lift_off_description
 
 
 def _resolve(specified: str | None) -> str | None:
@@ -32,12 +27,13 @@ def _resolve(specified: str | None) -> str | None:
     return find_atk_hidraw5()
 
 
-def _open(specified: Optional[str] = None) -> AtkDevice:
+def _open(specified: Optional[str] = None) -> HidDevice:
+    """Open a device, auto-detecting the path if not given."""
     path = _resolve(specified)
     if not path:
         print("No ATK device found. Use --device /dev/hidraw5", file=sys.stderr)
         sys.exit(1)
-    return AtkDevice(path)
+    return HidDevice(path)
 
 
 def cmd_battery(args: argparse.Namespace) -> None:
@@ -149,7 +145,7 @@ def cmd_monitor(args: argparse.Namespace) -> None:
         now = time.time()
         if now >= next_poll:
             try:
-                with AtkDevice(path) as dev:
+                with HidDevice(path) as dev:
                     status = dev.query_battery()
                 ts = time.strftime("%H:%M:%S")
                 if status:
@@ -183,11 +179,10 @@ def cmd_discover(args: argparse.Namespace) -> None:
             print(f"    page=0x{i['usage_page']:04X} usage=0x{i['usage']:04X}"
                   f"  iface={i['interface_number']}{mark}")
 
-        # Try full readout on the config interface
         config_ifaces = [i for i in ifaces if i["usage_page"] == 0xFF05]
         if config_ifaces:
             try:
-                with AtkDevice(path) as dev:
+                with HidDevice(path) as dev:
                     info = dev.read_all()
                 print(f"    Connection:     {info.connection_type or '?'}")
                 if info.battery:
@@ -211,7 +206,7 @@ def cmd_discover(args: argparse.Namespace) -> None:
                 if info.angle_snap is not None:
                     print(f"    Angle Snap:     {'On' if info.angle_snap else 'Off'}")
                 if info.ripple_control is not None:
-                    print(f"    Ripple ctrl:    {'On' if info.ripple_control else 'Off'}")
+                    print(f"    Ripple ctrl:   {'On' if info.ripple_control else 'Off'}")
                 if info.sleep_timeout_s:
                     print(f"    Auto sleep:     {info.sleep_timeout_s}s")
             except Exception as e:
@@ -220,7 +215,7 @@ def cmd_discover(args: argparse.Namespace) -> None:
 
 
 def cmd_debug(args: argparse.Namespace) -> None:
-    """Dump raw HID traffic."""
+    """Dump raw HID traffic via the abstract seam."""
     path = _resolve(args.device)
     if not path:
         print("No ATK device found.", file=sys.stderr)
@@ -229,23 +224,22 @@ def cmd_debug(args: argparse.Namespace) -> None:
     print(f"Debug on {path}. Ctrl+C to stop.\n")
 
     try:
-        dev = hid.Device(path=path.encode() if isinstance(path, str) else path)
-        dev.nonblocking = True
-        count = 0
-        while True:
-            resp = dev.read(64)
-            if resp:
-                count += 1
-                ts = time.strftime("%H:%M:%S.%f")[:-3]
-                hex_str = " ".join(f"{b:02x}" for b in resp)
+        with HidDevice(path) as dev:
+            count = 0
+            while True:
+                resp = dev.raw_read(64)
+                if resp:
+                    count += 1
+                    ts = time.strftime("%H:%M:%S.%f")[:-3]
+                    hex_str = " ".join(f"{b:02x}" for b in resp)
 
-                if len(resp) > 7 and resp[5] == 0x07:
-                    print(f"[{ts}] #{count:>4}  BAT {resp[7]}%  {hex_str}")
-                elif len(resp) > 5 and resp[1] == 0x72:
-                    print(f"[{ts}] #{count:>4}  cmd=0x{resp[5]:02X} len={resp[6]}  {hex_str}")
-                else:
-                    print(f"[{ts}] #{count:>4}  {hex_str}")
-            time.sleep(0.01)
+                    if len(resp) > 7 and resp[5] == 0x07:
+                        print(f"[{ts}] #{count:>4}  BAT {resp[7]}%  {hex_str}")
+                    elif len(resp) > 5 and resp[1] == 0x72:
+                        print(f"[{ts}] #{count:>4}  cmd=0x{resp[5]:02X} len={resp[6]}  {hex_str}")
+                    else:
+                        print(f"[{ts}] #{count:>4}  {hex_str}")
+                time.sleep(0.01)
     except KeyboardInterrupt:
         print("\nStopped.")
 
@@ -257,9 +251,8 @@ def cmd_eeprom(args: argparse.Namespace) -> None:
         print("No ATK device found.", file=sys.stderr)
         sys.exit(1)
 
-    with AtkDevice(path) as dev:
+    with HidDevice(path) as dev:
         if args.scan is not None:
-            # Scan a range of addresses, 10 bytes each
             end = args.scan
             step = 10
             for addr in range(args.address, end + 1, step):
@@ -269,7 +262,7 @@ def cmd_eeprom(args: argparse.Namespace) -> None:
                     print(f"  0x{addr:04X}: {hex_str}")
                 else:
                     print(f"  0x{addr:04X}: (no data)")
-                time.sleep(1.0)  # let mouse settle between reads
+                time.sleep(1.0)
             return
 
         data = dev.read_eeprom(args.address, args.length)
@@ -283,7 +276,6 @@ def cmd_eeprom(args: argparse.Namespace) -> None:
         print(f"  Hex:  {hex_str}")
         print(f"  Dec:  {ints}")
 
-        # Try little-endian uint16 interpretation
         if len(data) >= 2:
             u16 = [data[i] | (data[i+1] << 8) for i in range(0, len(data) - 1, 2)]
             print(f"  u16 (LE): {u16}")
@@ -329,7 +321,6 @@ def cmd_set_dpi(args: argparse.Namespace) -> None:
 
     with _open(args.device) as dev:
         if not has_values:
-            # Activate-only: read existing X and Y values for this stage
             _, stages, _ = dev.query_dpi()
             if not stages or stage >= len(stages) or stages[stage] == (0, 0):
                 print(f"Stage {stage} does not have DPI values configured.", file=sys.stderr)
@@ -370,12 +361,6 @@ def _parse_bool(val: str) -> bool:
         return False
     raise ValueError(f"expected on/off/1/0, got {val!r}")
 
-
-# Lift-off description imported from protocol.py
-# Uses lift_off_description() — offset-calibration level = lift-off level - 1
-
-
-# ── Setter CLI commands ──────────────────────────────────────
 
 def cmd_set_debounce(args: argparse.Namespace) -> None:
     """Set debounce/stabilization time."""
@@ -453,8 +438,19 @@ def cmd_set_liftoff(args: argparse.Namespace) -> None:
     with _open(args.device) as dev:
         ok = dev.set_lift_off(level)
         if ok:
-            # lift_off_description expects lift-off level = offset_calibration + 1
             print(f"OK Lift-off: level {level}  ({lift_off_description(level + 1)})")
+        else:
+            print("FAILED No response from device", file=sys.stderr)
+            sys.exit(1)
+
+
+def cmd_set_dongle_light(args: argparse.Namespace) -> None:
+    """Set dongle LED mode."""
+    mode = args.mode
+    with _open(args.device) as dev:
+        ok = dev.set_dongle_light(mode)
+        if ok:
+            print(f"OK Dongle LED mode set to {mode}")
         else:
             print("FAILED No response from device", file=sys.stderr)
             sys.exit(1)
@@ -503,7 +499,7 @@ def main() -> None:
     p.add_argument("--device", "-d", metavar="PATH",
                    help="HID device path. Auto-detected if omitted")
 
-    # ── monitor ───────────────────────────────────────────────────────
+    # ── monitor ────────────��──────────────────────────────────────────
     p = sub.add_parser(
         "monitor",
         help="Monitor battery continuously",
@@ -725,6 +721,17 @@ def main() -> None:
     p.add_argument("--device", "-d", metavar="PATH",
                    help="HID device path. Auto-detected if omitted")
 
+    # ── set-dongle-light ──────────────────────────────────────────────
+    p = sub.add_parser(
+        "set-dongle-light",
+        help="Set dongle LED mode",
+        description="Set the LED mode on the wireless receiver dongle.",
+    )
+    p.add_argument("mode", type=int, metavar="MODE",
+                   help="LED mode: 0=Off, 1=Polling rate, 2=Battery, 3=Low battery")
+    p.add_argument("--device", "-d", metavar="PATH",
+                   help="HID device path. Auto-detected if omitted")
+
     # ── Patch every subparser to show help on missing args ───────────
     for _name, _p in sub.choices.items():
         _p.error = lambda msg, _parser=_p: _help_on_missing(_parser, msg)
@@ -746,7 +753,7 @@ def main() -> None:
         "set-ripple": cmd_set_ripple,
         "set-sleep": cmd_set_sleep,
         "set-liftoff": cmd_set_liftoff,
-        
+        "set-dongle-light": cmd_set_dongle_light,
     }
     handler = _DISPATCH.get(args.command)
     if handler:

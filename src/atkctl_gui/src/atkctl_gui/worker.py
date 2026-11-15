@@ -6,17 +6,14 @@ in a separate thread and returning results via Qt signals.
 
 from __future__ import annotations
 
-from typing import Callable, Optional
+from typing import Callable
 
 from PySide6.QtCore import QObject, Signal, Slot
 
-from atkctl.protocol import (
-    AtkDevice,
-    MouseInfo,
-    find_atk_hidraw5,
-    POLLING_CODES_REV,
-    lift_off_description,
-)
+from atkctl.device import HidDevice
+from atkctl.discovery import find_atk_hidraw5
+from atkctl.models import MouseInfo, lift_off_description
+from atkctl.commands import POLLING_CODES_REV
 
 
 class HIDWorker(QObject):
@@ -27,7 +24,7 @@ class HIDWorker(QObject):
     as convenient entry points.
     """
 
-    # ── Signals (received by main thread) ──────────────────────────
+    # ── Signals (received by main thread) ─────────────────────────���
     connected = Signal(str)
     disconnected = Signal()
     error = Signal(str)
@@ -40,7 +37,7 @@ class HIDWorker(QObject):
 
     def __init__(self, parent: QObject | None = None):
         super().__init__(parent)
-        self._dev: AtkDevice | None = None
+        self._dev: HidDevice | None = None
         self._path: str | None = None
 
         # Wire execute to self._run to dispatch on our thread
@@ -71,7 +68,7 @@ class HIDWorker(QObject):
     def _open_path(self, path: str) -> None:
         try:
             self.close()
-            dev = AtkDevice(path)
+            dev = HidDevice(path)
             dev.open()
             self._dev = dev
             self._path = path
@@ -105,32 +102,22 @@ class HIDWorker(QObject):
             self.error.emit(f"Battery read failed: {exc}")
 
     def refresh_all(self) -> None:
-        """Query all telemetry (slow but complete)."""
+        """Query all telemetry — trusts read_all() to populate every field.
+
+        No longer duplicates the ``query_config()`` call that is already
+        made inside ``read_all()``.
+        """
         dev = self._dev
         if dev is None:
             self.error.emit("No device open.")
             return
         try:
             info = dev.read_all()
-            info.path = self._path
+            # Note: info.path is already set by read_all() from dev.path
 
-            # Re-read config so we have every field
-            cfg = dev.query_config()
-            if cfg:
-                info.polling_rate_hz = cfg.get("polling_rate_hz")
-                info.debounce_ms = cfg.get("debounce_ms")
-                info.motion_sync = cfg.get("motion_sync")
-                info.angle_snap = cfg.get("angle_snap")
-                info.ripple_control = cfg.get("ripple_control")
-                info.sleep_timeout_s = cfg.get("sleep_seconds")
-                lo_level = cfg.get("lift_off_level")
-                if lo_level is not None:
-                    info.lift_off = lift_off_description(lo_level)
-                    # Store numeric level too — the GUI slider needs it
-                    info.__dict__["lift_off_level"] = lo_level
-
-            # Wireless mode
-            if info.connection_type == "Wireless (2.4GHz)":
+            # Wireless mode — read_all() already handles this when
+            # connection_type is Wireless; this is a safety net.
+            if info.connection_type == "Wireless (2.4GHz)" and info.wireless_mode is None:
                 try:
                     info.wireless_mode = dev.query_wireless_mode()
                 except Exception:
@@ -179,5 +166,3 @@ class HIDWorker(QObject):
     def write_sleep_timeout(self, seconds: int) -> None:
         ok = bool(self._dev and self._dev.set_sleep_timeout(seconds))
         self.write_done.emit("Sleep timeout", ok)
-
-    

@@ -8,9 +8,8 @@ keep the UI responsive.
 from __future__ import annotations
 
 import sys
-from typing import Optional
 
-from PySide6.QtCore import QThread, Qt
+from PySide6.QtCore import QThread
 from PySide6.QtWidgets import (
     QApplication,
     QHBoxLayout,
@@ -27,46 +26,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from atkctl.protocol import MouseInfo
+from atkctl.models import MouseInfo, mouse_info_to_panel_data
 from atkctl_gui.ui.panel_dashboard import DashboardPanel
 from atkctl_gui.ui.panel_performance import PerformancePanel
 from atkctl_gui.ui.panel_dpi import DpiPanel
 from atkctl_gui.ui.panel_advanced import AdvancedPanel
 from atkctl_gui.worker import HIDWorker
-
-
-def _info_to_dict(info: MouseInfo) -> dict:
-    """Convert a MouseInfo dataclass to a plain dict for panel.populate()."""
-    d: dict = {}
-    if info is None:
-        return d
-
-    d["path"] = info.path
-    d["connection_type"] = info.connection_type
-    d["wireless_mode"] = info.wireless_mode
-    d["firmware"] = info.firmware
-    d["version"] = info.version
-    d["polling_rate_hz"] = info.polling_rate_hz
-    d["debounce_ms"] = info.debounce_ms
-    d["motion_sync"] = info.motion_sync
-    d["angle_snap"] = info.angle_snap
-    d["ripple_control"] = info.ripple_control
-    d["sleep_timeout_s"] = info.sleep_timeout_s
-    d["lift_off"] = info.lift_off
-    d["lift_off_level"] = getattr(info, "lift_off_level", None)
-    d["dpi"] = info.dpi
-    d["dpi_stages"] = info.dpi_stages
-    d["active_dpi_stage"] = info.active_dpi_stage
-    d["dpi_stage_count"] = info.dpi_stage_count
-    
-
-    if info.battery:
-        d["battery"] = {
-            "level": info.battery.level,
-            "charging": info.battery.charging,
-            "voltage_mv": info.battery.voltage_mv,
-        }
-    return d
 
 
 class MainWindow(QMainWindow):
@@ -127,12 +92,11 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.advanced, "Advanced")
         main_layout.addWidget(self.tabs, 1)
 
-        # Bottom: "Refresh All" and "Save All"
+        # Bottom: "Refresh All"
         btn_bar = QHBoxLayout()
         self.refresh_all_btn = QPushButton("Refresh All")
         self.refresh_all_btn.clicked.connect(self._on_refresh_all)
         btn_bar.addWidget(self.refresh_all_btn)
-
         main_layout.addLayout(btn_bar)
 
         # Status bar with progress bar
@@ -154,14 +118,12 @@ class MainWindow(QMainWindow):
         self.dpi_panel.apply_btn.clicked.connect(self._on_apply_dpi)
         self.advanced.toggle_apply.clicked.connect(self._on_apply_toggles)
         self.advanced.sleep_apply.clicked.connect(self._on_apply_sleep)
-        
 
         # Collect all interactive buttons so we can lock them
         self._all_buttons = [
             self.manual_path_btn,
             self.reconnect_btn,
             self.refresh_all_btn,
-            
             self.dashboard.refresh_btn,
             self.performance.polling_apply,
             self.performance.debounce_apply,
@@ -169,7 +131,6 @@ class MainWindow(QMainWindow):
             self.dpi_panel.apply_btn,
             self.advanced.toggle_apply,
             self.advanced.sleep_apply,
-            
         ]
 
         # ── Start the thread ───────────────────────────────────────
@@ -203,8 +164,6 @@ class MainWindow(QMainWindow):
         self._worker.execute.emit(cb)
 
     def _schedule_auto_detect(self) -> None:
-        # auto_detect is quick (just HID enumeration + open); no busy token needed.
-        # refresh_all is where the real waiting happens.
         self._worker.execute.emit(self._worker.auto_detect)
 
     # ── Slots (run on MAIN thread) ─────────────────────────────────
@@ -222,12 +181,11 @@ class MainWindow(QMainWindow):
             self.path_edit.setPlaceholderText("No device — enter path or click Auto")
 
     def _on_battery(self, info: MouseInfo) -> None:
-        d = _info_to_dict(info)
-        self.dashboard.populate(d)
+        self.dashboard.populate(mouse_info_to_panel_data(info))
         self._set_busy(False)
 
     def _on_status(self, info: MouseInfo) -> None:
-        d = _info_to_dict(info)
+        d = mouse_info_to_panel_data(info)
         self.dashboard.populate(d)
         self.performance.populate(d)
         self.dpi_panel.populate(d)
@@ -239,17 +197,15 @@ class MainWindow(QMainWindow):
         self._set_busy(False)
         if ok:
             self.status_bar.showMessage(f"✓ {command} written", 5000)
-            # Re-read to reflect changes
             self._execute(self._worker.refresh_all)
         else:
             self.status_bar.showMessage(f"✗ {command} failed — no device response", 10000)
             QMessageBox.warning(self, "Write Failed",
                                 f"Could not write {command}.\nMouse may be asleep or disconnected.")
 
-    # ── UI action handlers ─────────────────────────────────────────
+    # ── UI action handlers ────────────────���────────────────────────
 
     def _on_manual_path(self) -> None:
-        """Let the user type a device path directly."""
         path, ok = QInputDialog.getText(
             self, "Device Path",
             "Enter HID path (e.g. /dev/hidraw5):",
