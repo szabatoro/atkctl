@@ -22,7 +22,7 @@
 | `commands.py` | BITMOUSE command IDs, polling rate code maps, slot constants, EEPROM address map |
 | `models.py` | ``BatteryStatus``, ``MouseInfo`` dataclasses, ``PanelData`` TypedDict, ``lift_off_description()`` |
 | `framing.py` | ``build_request()``, ``parse_response()``, ``_calc_checksum()`` |
-| `discovery.py`` | ``find_atk_hidraw5()``, ``enumerate_atk_interfaces()`` |
+| `discovery.py` | ``find_atk_hidraw5()``, ``enumerate_atk_interfaces()`` |
 | `device.py` | ``AtkDeviceProtocol``, ``HidDevice``, ``FakeDevice``, ``create_device()`` |
 
 ## Architecture decisions
