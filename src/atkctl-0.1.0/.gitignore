@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# GUI sub-package build
+src/atkctl_gui/dist/
+src/atkctl_gui/src/atkctl_gui.egg-info/
+
+# Virtual environments
+.venv
+
+# Build artifacts (makepkg)
+pkg/
+*.pkg.tar.zst
+# makepkg's srcdir artifacts (created in prepare())
+src/*.tar.gz
+src/atkmouse-*/

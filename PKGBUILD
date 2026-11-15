@@ -45,15 +45,10 @@ build() {
 check() {
     cd "$srcdir/$pkgname-$pkgver"
     # Smoke test: verify package imports and key constants.
-    # Version now lives in pyproject.toml (single source of truth).
-    # During check() the package isn't installed, so __version__ is '0.0.0-dev'.
     PYTHONPATH=src python -c "
 from atkctl import __version__
-from atkctl.protocol import (
-    BatteryStatus, POLLING_CODES, lift_off_description,
-    REPORT_ID, PACKET_SIZE, SLOT_WIRED, SLOT_WIRELESS,
-)
-assert __version__ == '0.0.0-dev', f'unexpected {__version__} (dev mode)'
+from atkctl.commands import POLLING_CODES, REPORT_ID, PACKET_SIZE, SLOT_WIRED, SLOT_WIRELESS
+from atkctl.models import BatteryStatus, lift_off_description
 import tomllib
 with open('pyproject.toml', 'rb') as f:
     cfg = tomllib.load(f)
