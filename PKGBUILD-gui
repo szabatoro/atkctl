@@ -34,22 +34,29 @@ prepare() {
 
 build() {
     # Build only the GUI sub-package from its own pyproject.toml
-    cd "$srcdir/atkctl-$pkgver/atkctl_gui"
+    cd "$srcdir/atkctl-$pkgver/src/atkctl_gui"
     uv build
 }
 
 check() {
     cd "$srcdir/atkctl-$pkgver"
-    # Smoke test: verify the GUI package code
-    PYTHONPATH=atkctl_gui/src python -c "
+    # Smoke test: verify the GUI package code.
+    # Version now lives in pyproject.toml (single source of truth).
+    # During check() the package isn't installed, so __version__ is '0.0.0-dev'.
+    PYTHONPATH=src/atkctl_gui/src python -c "
 from atkctl_gui import __version__
-assert __version__ == '$pkgver', f'expected $pkgver, got {__version__}'
-print(f'OK atkctl-gui {__version__} — smoke test passed')
+assert __version__ == '0.0.0-dev', f'unexpected {__version__} (dev mode)'
+import tomllib
+with open('src/atkctl_gui/pyproject.toml', 'rb') as f:
+    cfg = tomllib.load(f)
+pkgver = cfg['project']['version']
+assert pkgver == '$pkgver', f'pyproject.toml version {pkgver} != PKGBUILD pkgver $pkgver'
+print(f'OK atkctl-gui {pkgver} — smoke test passed')
 "
 }
 
 package() {
-    cd "$srcdir/atkctl-$pkgver/atkctl_gui"
+    cd "$srcdir/atkctl-$pkgver/src/atkctl_gui"
 
     # ── Python module + scripts ─────────────────────────────────────────────
     python -m installer --destdir="$pkgdir" dist/*.whl

@@ -7,8 +7,8 @@ wheels/
 *.egg-info
 
 # GUI sub-package build
-atkctl_gui/dist/
-atkctl_gui/src/atkctl_gui.egg-info/
+src/atkctl_gui/dist/
+src/atkctl_gui/src/atkctl_gui.egg-info/
 
 # Virtual environments
 .venv

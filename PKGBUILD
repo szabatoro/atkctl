@@ -44,19 +44,26 @@ build() {
 
 check() {
     cd "$srcdir/$pkgname-$pkgver"
-    # Smoke test: verify package imports and key constants
+    # Smoke test: verify package imports and key constants.
+    # Version now lives in pyproject.toml (single source of truth).
+    # During check() the package isn't installed, so __version__ is '0.0.0-dev'.
     PYTHONPATH=src python -c "
 from atkctl import __version__
 from atkctl.protocol import (
     BatteryStatus, POLLING_CODES, lift_off_description,
     REPORT_ID, PACKET_SIZE, SLOT_WIRED, SLOT_WIRELESS,
 )
-assert __version__ == '$pkgver', f'expected $pkgver, got {__version__}'
+assert __version__ == '0.0.0-dev', f'unexpected {__version__} (dev mode)'
+import tomllib
+with open('pyproject.toml', 'rb') as f:
+    cfg = tomllib.load(f)
+pkgver = cfg['project']['version']
+assert pkgver == '$pkgver', f'pyproject.toml version {pkgver} != PKGBUILD pkgver $pkgver'
 assert POLLING_CODES[0] == 1000
 assert POLLING_CODES[6] == 2000
 assert lift_off_description(1) == '0.7 mm  (Low)'
 from atkctl.cli import main
-print(f'OK atkctl {__version__} — smoke test passed')
+print(f'OK atkctl {pkgver} — smoke test passed')
 "
 }
 

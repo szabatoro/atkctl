@@ -1,8 +1,10 @@
 # atkctl — Agent Guidance
 
+> 🧠 **Vibecoded with [OpenCode](https://opencode.ai/)** — this project was built entirely through iterative AI pair-programming. The protocol reverse-engineering, CLI, GUI, Arch packaging, and documentation are all the result of agent-driven development. Treat the whole codebase as AI-native — agents are expected to edit, refactor, and extend it freely.
+
 ## Project Overview
 
-Python CLI tool for reading and configuring ATK A9 PRO MAX 2.0 NK gaming mice (and compatible ATK/VXE/VGN models). Communicates over USB HID using the **BITMOUSE protocol** (report ID `0x08`, usage page `0xFF05`).
+Python CLI + GUI tool for reading and configuring ATK A9 PRO MAX 2.0 NK gaming mice (and compatible ATK/VXE/VGN models). Communicates over USB HID using the **BITMOUSE protocol** (report ID `0x08`, usage page `0xFF05`).
 
 The protocol was reverse-engineered by intercepting WebHID traffic from [ATK HUB](https://hub.atk.pro/) and cross-referenced against [OpenMouse mouse-protocol](https://github.com/OpenMouse-Project/mouse-protocol).
 
@@ -12,9 +14,11 @@ The protocol was reverse-engineered by intercepting WebHID traffic from [ATK HUB
 |------|-------------|
 | `src/atkctl/protocol.py` | Core protocol — BITMOUSE framing, `AtkDevice` class, all query/command methods |
 | `src/atkctl/cli.py` | CLI commands — `battery`, `status`, `monitor`, `discover`, `debug`, `eeprom`, all `set-*` commands |
+| `src/atkctl_gui/` | Qt6 GUI frontend (PySide6) — independent `pyproject.toml` at `src/atkctl_gui/pyproject.toml` |
 | `docs/PROTOCOL.md` | Full protocol documentation (BITMOUSE frame format, commands, DPI block, config block) |
 | `udev/70-atkctl-mouse.rules` | udev rules — grants seat-local users ACL-based access |
-| `PKGBUILD` | Arch Linux package definition |
+| `PKGBUILD` | Arch Linux package definition (CLI) |
+| `PKGBUILD-gui` | Arch Linux package definition (GUI) |
 
 ## Protocol Summary (BITMOUSE)
 
