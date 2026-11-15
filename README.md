@@ -39,7 +39,6 @@ uv run atkctl monitor
 | `atkctl set-ripple` | Toggle ripple control |
 | `atkctl set-sleep` | Set auto-sleep timeout |
 | `atkctl set-liftoff` | Set lift-off distance |
-| `atkctl set-dongle-light` | Set dongle LED mode |
 | `atkctl-gui` | Qt GUI frontend (requires `python-pyside6`) |
 
 Use `atkctl <command> --help` for per-command options. Add `--device /dev/hidrawN` if auto-detection doesn't find the right path.

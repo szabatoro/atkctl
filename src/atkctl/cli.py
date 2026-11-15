@@ -444,18 +444,6 @@ def cmd_set_liftoff(args: argparse.Namespace) -> None:
             sys.exit(1)
 
 
-def cmd_set_dongle_light(args: argparse.Namespace) -> None:
-    """Set dongle LED mode."""
-    mode = args.mode
-    with _open(args.device) as dev:
-        ok = dev.set_dongle_light(mode)
-        if ok:
-            print(f"OK Dongle LED mode set to {mode}")
-        else:
-            print("FAILED No response from device", file=sys.stderr)
-            sys.exit(1)
-
-
 def _help_on_missing(parser: argparse.ArgumentParser, msg: str) -> None:
     """Print parser help + error to stderr, then exit."""
     parser.print_help(file=sys.stderr)
@@ -721,17 +709,6 @@ def main() -> None:
     p.add_argument("--device", "-d", metavar="PATH",
                    help="HID device path. Auto-detected if omitted")
 
-    # ── set-dongle-light ──────────────────────────────────────────────
-    p = sub.add_parser(
-        "set-dongle-light",
-        help="Set dongle LED mode",
-        description="Set the LED mode on the wireless receiver dongle.",
-    )
-    p.add_argument("mode", type=int, metavar="MODE",
-                   help="LED mode: 0=Off, 1=Polling rate, 2=Battery, 3=Low battery")
-    p.add_argument("--device", "-d", metavar="PATH",
-                   help="HID device path. Auto-detected if omitted")
-
     # ── Patch every subparser to show help on missing args ───────────
     for _name, _p in sub.choices.items():
         _p.error = lambda msg, _parser=_p: _help_on_missing(_parser, msg)
@@ -753,7 +730,6 @@ def main() -> None:
         "set-ripple": cmd_set_ripple,
         "set-sleep": cmd_set_sleep,
         "set-liftoff": cmd_set_liftoff,
-        "set-dongle-light": cmd_set_dongle_light,
     }
     handler = _DISPATCH.get(args.command)
     if handler:
