@@ -67,5 +67,5 @@ package() {
     python -m installer --destdir="$pkgdir" dist/*.whl
 
     # ── udev rules — users physically at the console get ACL-based access ───
-    install -Dm644 udev/99-atkctl-mouse.rules "$pkgdir/usr/lib/udev/rules.d/99-atkctl-mouse.rules"
+    install -Dm644 udev/70-atkctl-mouse.rules "$pkgdir/usr/lib/udev/rules.d/70-atkctl-mouse.rules"
 }

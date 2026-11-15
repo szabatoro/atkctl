@@ -8,7 +8,7 @@ Communicates over USB HID using the reverse-engineered BITMOUSE protocol on usag
 
 ```bash
 # Install udev rules (one-time; unplug/replug after)
-sudo cp udev/99-atkctl-mouse.rules /etc/udev/rules.d/
+sudo cp udev/70-atkctl-mouse.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
@@ -58,10 +58,10 @@ uv run atkctl battery
 
 ### udev rules
 
-The udev rule at `udev/99-atkctl-mouse.rules` grants access to users physically at the system's console (via `TAG+="uaccess"` / systemd-logind ACL). Without it you'll need root:
+The udev rule at `udev/70-atkctl-mouse.rules` grants access to users physically at the system's console (via `TAG+="uaccess"` / systemd-logind ACL). Without it you'll need root:
 
 ```bash
-sudo cp udev/99-atkctl-mouse.rules /etc/udev/rules.d/
+sudo cp udev/70-atkctl-mouse.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 ```
 
@@ -73,7 +73,7 @@ sudo udevadm control --reload-rules
 | `src/atkctl/protocol.py` | BITMOUSE protocol — `AtkDevice` class, all query/command methods |
 | `src/atkctl/cli.py` | CLI entry point and all subcommands |
 | `docs/PROTOCOL.md` | Full protocol documentation (frame format, commands, DPI block) |
-| `udev/99-atkctl-mouse.rules` | udev rules for device access |
+| `udev/70-atkctl-mouse.rules` | udev rules for device access |
 | `PKGBUILD` | Arch Linux package definition |
 
 ## Credits

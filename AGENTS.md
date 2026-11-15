@@ -13,7 +13,7 @@ The protocol was reverse-engineered by intercepting WebHID traffic from [ATK HUB
 | `src/atkctl/protocol.py` | Core protocol — BITMOUSE framing, `AtkDevice` class, all query/command methods |
 | `src/atkctl/cli.py` | CLI commands — `battery`, `status`, `monitor`, `discover`, `debug`, `eeprom`, all `set-*` commands |
 | `docs/PROTOCOL.md` | Full protocol documentation (BITMOUSE frame format, commands, DPI block, config block) |
-| `udev/99-atkctl-mouse.rules` | udev rules — grants seat-local users ACL-based access |
+| `udev/70-atkctl-mouse.rules` | udev rules — grants seat-local users ACL-based access |
 | `PKGBUILD` | Arch Linux package definition |
 
 ## Protocol Summary (BITMOUSE)
