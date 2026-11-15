@@ -72,10 +72,15 @@ sudo udevadm control --reload-rules
 | Path | Description |
 |------|-------------|
 | `src/atkctl/` | CLI Python package source |
-| `src/atkctl/protocol.py` | BITMOUSE protocol — `AtkDevice` class, all query/command methods |
 | `src/atkctl/cli.py` | CLI entry point and all subcommands |
+| `src/atkctl/commands.py` | BITMOUSE command IDs, polling rate codes, slot constants, EEPROM map |
+| `src/atkctl/models.py` | Data models — `BatteryStatus`, `MouseInfo`, `PanelData` TypedDict |
+| `src/atkctl/framing.py` | BITMOUSE frame building and parsing |
+| `src/atkctl/discovery.py` | Device discovery — `find_atk_hidraw5()`, `enumerate_atk_interfaces()` |
+| `src/atkctl/device.py` | Abstract seam (`AtkDeviceProtocol`), HID impl (`HidDevice`), test fake (`FakeDevice`) |
 | `src/atkctl_gui/` | Qt6 GUI frontend (PySide6) — independent `pyproject.toml` |
-| `src/atkctl_gui/src/atkctl_gui/` | GUI package source |
+| `tests/test_device.py` | 38 tests using the `FakeDevice` seam |
+| `CONTEXT.md` | Domain glossary and architecture decisions |
 | `docs/PROTOCOL.md` | Full protocol documentation (frame format, commands, DPI block) |
 | `udev/70-atkctl-mouse.rules` | udev rules for device access |
 | `PKGBUILD` | Arch Linux package definition (CLI) |
