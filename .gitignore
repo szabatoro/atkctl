@@ -19,3 +19,4 @@ pkg/
 # makepkg's srcdir artifacts (created in prepare())
 src/*.tar.gz
 src/atkmouse-*/
+src/atkctl-*/
